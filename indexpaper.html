@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-height, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #000000, #003300);
+            color: white;
+            text-align: center;
+            padding: 50px;
+            margin: 0; /* Remove default margin */
+            height: 100vh; /* Ensure the body takes the full height of the viewport */
+            position: relative; /* Position relative to allow absolute positioning of counters */
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 5px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        #counterSection {
+            position: absolute;
+            top: 20px;
+            left: 20px; /* Positioning to the left */
+            text-align: left; /* Align text to the left */
+        }
+        #purchaseSection {
+            margin-top: 10px; /* Add some margin for separation */
+        }
+    </style>
+</head>
+<body>
+    <h1>Rock Paper Scissors Game</h1>
+    <div id="counterSection">
+        <div id="winCountDisplay">Wins in a row: 0</div>
+        <div id="totalWinsDisplay">Total Wins: 0</div> <!-- Total Wins Display -->
+        <div id="purchaseSection">
+            <input type="number" id="safeInput" min="1" placeholder="How many Safes?" />
+            <button onclick="buySafes()">Buy Safes</button>
+        </div>
+    </div>
+
+    <div>
+        <button onclick="playGame('rock')">Rock</button>
+        <button onclick="playGame('paper')">Paper</button>
+        <button onclick="playGame('scissors')">Scissors</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        let winCount = 0; // Counter for wins in a row
+        let totalWins = 0; // Total wins counter
+        let hasSafe = false; // Whether the player has purchased the Safe
+
+        function playGame(userChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+            let result;
+
+            // If the player has a Safe and loses, they automatically win
+            if (hasSafe && !isPlayerWinner(userChoice, computerChoice)) {
+                result = "You lose! But your Safe protects you. You win!";
+                hasSafe = false; // Safe is used
+                winCount++; // Count it as a win
+                totalWins++; // Increment total wins
+            } else if (isPlayerWinner(userChoice, computerChoice)) {
+                result = "You win!";
+                winCount++; // Increment win count
+                totalWins++; // Increment total wins
+            } else {
+                result = "You lose!";
+                winCount = 0; // Reset win count on loss
+            }
+
+            // Update the win count displays
+            document.getElementById("winCountDisplay").innerText = `Wins in a row: ${winCount}`;
+            document.getElementById("totalWinsDisplay").innerText = `Total Wins: ${totalWins}`;
+
+            // Check for 3 wins in a row
+            if (winCount === 3) {
+                const buySafe = confirm("You've won 3 times in a row! Do you want to buy a Safe?");
+                if (buySafe) {
+                    hasSafe = true; // Player buys the Safe
+                    alert("You have purchased a Safe! If you lose your next game, you will win instead.");
+                    winCount = 0; // Reset win count after the prompt
+                }
+            }
+
+            // Display the result
+            document.getElementById("result").innerHTML = `
+                You chose: ${userChoice} <br>
+                Computer chose: ${computerChoice} <br>
+                Result: ${result}
+            `;
+        }
+
+        function isPlayerWinner(userChoice, computerChoice) {
+            return (
+                (userChoice === 'rock' && computerChoice === 'scissors') ||
+                (userChoice === 'paper' && computerChoice === 'rock') ||
+                (userChoice === 'scissors' && computerChoice === 'paper')
+            );
+        }
+
+        function buySafes() {
+            const safeInput = document.getElementById("safeInput");
+            const safesToBuy = parseInt(safeInput.value);
+
+            if (safesToBuy <= 0) {
+                alert("Please enter a valid number of Safes.");
+                return;
+            }
+
+            const totalCost = safesToBuy * 3; // Each Safe costs 3 wins
+
+            if (totalCost > winCount) {
+                alert("You don't have enough wins in a row. Please buy less or make more wins in a row.");
+            } else {
+                hasSafe = true; // Player buys the Safe
+                winCount -= totalCost; // Reduce win count by the total cost of Safes purchased
+                alert(`Thanks for buying ${safesToBuy} Safe(s)! You now have ${winCount} wins in a row.`);
+                // Update the win count display
+                document.getElementById("winCountDisplay").innerText = `Wins in a row: ${winCount}`;
+                safeInput.value = ""; // Clear input after purchase
+            }
+        }
+    </script>
+</body>
+</html>
